@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fungal Forecast — Flush Conditions Journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --soil-900:#171310;
+    --soil-800:#211a14;
+    --soil-700:#2b2119;
+    --soil-600:#3a2c20;
+    --bark:#4d3b2a;
+    --spore:#efe6d4;
+    --spore-dim:#c9bda6;
+    --moss:#8ba86e;
+    --moss-dim:#6d8a56;
+    --chanterelle:#e08d3c;
+    --chanterelle-dim:#b5701f;
+    --clay:#b5533c;
+    --line: rgba(239,230,212,0.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(139,168,110,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(224,141,60,0.08), transparent 55%),
+      var(--soil-900);
+    color:var(--spore);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:44px 22px 90px;}
+
+  /* ---------- Header ---------- */
+  header{margin-bottom:38px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--moss);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .eyebrow::before{content:"";width:22px;height:1px;background:var(--moss-dim);}
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-optical-sizing:auto;
+    font-size:clamp(34px,5.4vw,54px);
+    line-height:1.02;
+    margin:0 0 14px;
+    letter-spacing:-0.01em;
+  }
+  h1 em{font-style:italic;font-weight:400;color:var(--chanterelle);}
+  .sub{
+    font-size:16px;
+    line-height:1.55;
+    color:var(--spore-dim);
+    max-width:56ch;
+  }
+
+  /* ---------- Search card ---------- */
+  .search-card{
+    background:var(--soil-800);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:22px;
+    margin-top:30px;
+    position:relative;
+  }
+  .search-card::before{
+    content:"FIELD LOG ENTRY";
+    position:absolute;
+    top:-9px; left:20px;
+    background:var(--soil-900);
+    padding:0 8px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.14em;
+    color:var(--spore-dim);
+  }
+  .row{display:flex;gap:10px;flex-wrap:wrap;}
+  .field{flex:1;min-width:220px;}
+  label{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--spore-dim);
+    margin-bottom:7px;
+  }
+  input[type=text], select{
+    width:100%;
+    background:var(--soil-700);
+    border:1px solid var(--line);
+    color:var(--spore);
+    font-family:'Work Sans',sans-serif;
+    font-size:15px;
+    padding:11px 13px;
+    border-radius:8px;
+    outline:none;
+    transition:border-color .15s;
+  }
+  input[type=text]:focus, select:focus{border-color:var(--moss);}
+  select{cursor:pointer;}
+  .btn-row{display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap;}
+  button{
+    font-family:'Work Sans',sans-serif;
+    font-weight:600;
+    font-size:14.5px;
+    border-radius:8px;
+    padding:11px 20px;
+    border:none;
+    cursor:pointer;
+    transition:transform .1s, opacity .15s;
+  }
+  button:active{transform:scale(0.98);}
+  .btn-primary{background:var(--moss);color:#161b12;}
+  .btn-primary:hover{background:#9bbb7c;}
+  .btn-primary:disabled{opacity:0.5;cursor:default;}
+  .btn-ghost{background:transparent;color:var(--spore-dim);border:1px solid var(--line);}
+  .btn-ghost:hover{color:var(--spore);border-color:var(--spore-dim);}
+  .geo-note{font-size:12.5px;color:var(--spore-dim);font-family:'IBM Plex Mono',monospace;}
+
+  .status{
+    margin-top:16px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    color:var(--chanterelle);
+    display:none;
+  }
+  .status.show{display:block;}
+  .error-box{
+    margin-top:16px;
+    background:rgba(181,83,60,0.12);
+    border:1px solid rgba(181,83,60,0.4);
+    color:#e6a493;
+    padding:12px 14px;
+    border-radius:8px;
+    font-size:13.5px;
+    display:none;
+  }
+  .error-box.show{display:block;}
+
+  /* ---------- Disclaimer ---------- */
+  .disclaimer{
+    margin-top:20px;
+    border-left:3px solid var(--clay);
+    padding:12px 16px;
+    background:rgba(181,83,60,0.07);
+    font-size:13px;
+    line-height:1.55;
+    color:var(--spore-dim);
+    border-radius:0 8px 8px 0;
+  }
+  .disclaimer strong{color:var(--spore);}
+
+  /* ---------- Results ---------- */
+  #results{display:none;margin-top:46px;}
+  #results.show{display:block;}
+  .section-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--spore-dim);
+    margin:0 0 16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .section-label::after{content:"";flex:1;height:1px;background:var(--line);}
+
+  /* Score dial block */
+  .score-block{
+    display:flex;
+    gap:34px;
+    align-items:center;
+    flex-wrap:wrap;
+    background:var(--soil-800);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:28px;
+  }
+  .dial-wrap{flex-shrink:0;}
+  .score-text{flex:1;min-width:220px;}
+  .score-label{
+    font-family:'Fraunces',serif;
+    font-size:26px;
+    font-weight:600;
+    margin:0 0 8px;
+  }
+  .score-desc{font-size:14.5px;line-height:1.6;color:var(--spore-dim);max-width:44ch;}
+  .score-tags{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    padding:5px 10px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    color:var(--spore-dim);
+  }
+  .tag.hi{border-color:var(--moss-dim);color:var(--moss);}
+  .tag.lo{border-color:var(--clay);color:#e6a493;}
+
+  /* precip chart */
+  .precip-card{
+    background:var(--soil-800);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:26px;
+    margin-top:22px;
+  }
+  .precip-header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px;margin-bottom:18px;}
+  .precip-total{font-family:'Fraunces',serif;font-size:30px;font-weight:600;}
+  .precip-total span{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--spore-dim);font-weight:400;margin-left:8px;}
+  .chart{display:flex;align-items:flex-end;gap:5px;height:120px;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .bar{
+    width:100%;
+    max-width:26px;
+    background:linear-gradient(180deg, var(--moss), var(--moss-dim));
+    border-radius:3px 3px 1px 1px;
+    min-height:2px;
+  }
+  .bar-day{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9.5px;
+    color:var(--spore-dim);
+    margin-top:6px;
+    writing-mode:vertical-rl;
+    text-orientation:mixed;
+  }
+
+  /* species grid */
+  .species-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:14px;}
+  .species-card{
+    background:var(--soil-800);
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .species-photo{width:100%;height:140px;object-fit:cover;background:var(--soil-700);display:block;}
+  .species-photo.placeholder{display:flex;align-items:center;justify-content:center;color:var(--spore-dim);font-size:36px;}
+  .species-body{padding:14px 16px 16px;}
+  .species-name{font-family:'Fraunces',serif;font-weight:600;font-size:17px;margin:0 0 3px;}
+  .species-sci{font-family:'IBM Plex Mono',monospace;font-style:italic;font-size:11.5px;color:var(--spore-dim);margin-bottom:9px;}
+  .species-meta{font-size:12.5px;color:var(--spore-dim);line-height:1.5;margin-bottom:8px;}
+  .species-note{font-size:12.5px;color:var(--spore-dim);line-height:1.5;border-top:1px solid var(--line);padding-top:9px;margin-top:2px;}
+  .species-link{
+    display:inline-block;
+    margin-top:10px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--chanterelle);
+    text-decoration:none;
+    letter-spacing:0.03em;
+  }
+  .species-link:hover{text-decoration:underline;}
+  .no-sightings{
+    font-size:14px;
+    color:var(--spore-dim);
+    padding:20px;
+    text-align:center;
+    background:var(--soil-800);
+    border:1px dashed var(--line);
+    border-radius:12px;
+  }
+
+  /* trails list */
+  .trail-list{display:flex;flex-direction:column;gap:8px;}
+  .trail-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:var(--soil-800);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:13px 16px;
+    flex-wrap:wrap;
+  }
+  .trail-icon{font-size:18px;flex-shrink:0;}
+  .trail-info{flex:1;min-width:180px;}
+  .trail-name{font-weight:600;font-size:14.5px;margin:0 0 2px;}
+  .trail-meta{font-size:12px;color:var(--spore-dim);font-family:'IBM Plex Mono',monospace;}
+  .trail-links{display:flex;gap:8px;flex-shrink:0;}
+  .trail-links a{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--chanterelle);
+    text-decoration:none;
+    border:1px solid var(--line);
+    padding:6px 10px;
+    border-radius:6px;
+    white-space:nowrap;
+  }
+  .trail-links a:hover{border-color:var(--chanterelle-dim);}
+  .trail-source-note{
+    font-size:11.5px;
+    color:var(--spore-dim);
+    margin-top:12px;
+    line-height:1.5;
+  }
+
+  footer{margin-top:60px;font-size:12px;color:var(--spore-dim);font-family:'IBM Plex Mono',monospace;line-height:1.7;border-top:1px solid var(--line);padding-top:20px;}
+  footer a{color:var(--moss);}
+
+  @media (prefers-reduced-motion:no-preference){
+    .species-card, .search-card, .score-block, .precip-card{
+      animation:rise .4s ease both;
+    }
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Field Journal · Vol. 01</div>
+    <h1>Fungal <em>Forecast</em></h1>
+    <p class="sub">Cross-references two weeks of rainfall against nearby edible-mushroom sightings on iNaturalist to gauge whether conditions favor a flush.</p>
+  </header>
+
+  <div class="search-card">
+    <div class="row">
+      <div class="field">
+        <label for="place">Location</label>
+        <input type="text" id="place" placeholder="City, region, or park — e.g. Asheville, NC" autocomplete="off">
+      </div>
+      <div class="field" style="max-width:170px;">
+        <label for="radius">Search radius</label>
+        <select id="radius">
+          <option value="15">15 km</option>
+          <option value="30" selected>30 km</option>
+          <option value="50">50 km</option>
+          <option value="100">100 km</option>
+        </select>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px;">
+      <div class="field">
+        <label for="species">Focus species (optional)</label>
+        <select id="species">
+          <option value="">All edible species — overview</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" id="goBtn">Read the conditions</button>
+      <button class="btn-ghost" id="geoBtn">Use my location</button>
+      <span class="geo-note" id="geoLabel"></span>
+    </div>
+    <div class="status" id="status"></div>
+    <div class="error-box" id="errorBox"></div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>Field notice:</strong> this tool estimates rough odds from rainfall and public sighting data — it cannot identify a mushroom. Never eat anything based on this app alone. Confirm every find with a current field guide, a spore print, and ideally an experienced forager or mycological society; several deadly species closely resemble popular edibles.
+  </div>
+
+  <div id="results">
+
+    <div class="score-block" id="scoreBlock"></div>
+
+    <div class="precip-card" id="precipCard"></div>
+
+    <div style="margin-top:34px;">
+      <p class="section-label" id="speciesSectionLabel">Edible species spotted nearby</p>
+      <div id="speciesArea"></div>
+    </div>
+
+    <div style="margin-top:34px;">
+      <p class="section-label">Nearby trails &amp; woods to check</p>
+      <div id="trailsArea"></div>
+    </div>
+
+  </div>
+
+  <footer>
+    Rain data: Open-Meteo forecast archive · Sighting data: iNaturalist public API (Fungi observations, last 60 days)<br>
+    This is a heuristic built from public data, not a scientific model or an identification service.
+  </footer>
+
+</div>
+
+<script>
+const DEFAULT_PIVOT_MM = 30; // rough general-purpose fruiting threshold used for the "all species" overview
+
+const EDIBLE_SPECIES = [
+  {common:"Morel", sci:["morchella"], emoji:"🟤", pivotMm:18, note:"Look 1–2 weeks after warm rain following the last frost, especially near dying elms, ash, or old apple trees. Responds to lighter, well-timed spring rain more than sheer volume."},
+  {common:"Chanterelle", sci:["cantharellus"], emoji:"🟠", pivotMm:42, note:"Needs sustained moisture through summer and fall under oak, beech, or conifer — a light shower usually isn't enough."},
+  {common:"King Bolete / Porcini", sci:["boletus edulis","boletus rex-veris","boletus separans"], emoji:"🟫", pivotMm:38, note:"Flushes in conifer or oak duff after warm rain, typically summer through fall."},
+  {common:"Chicken of the Woods", sci:["laetiporus"], emoji:"🟧", pivotMm:24, note:"Shelves out on living or dead oak, cherry, and other hardwoods after rain, spring through fall."},
+  {common:"Hen of the Woods / Maitake", sci:["grifola frondosa"], emoji:"🟤", pivotMm:38, note:"Grows at the base of mature oaks, usually September–October after rain."},
+  {common:"Lion's Mane", sci:["hericium erinaceus","hericium americanum","hericium coralloides"], emoji:"⚪", pivotMm:26, note:"Fruits from wounds on living or dead hardwoods, late summer through fall."},
+  {common:"Oyster Mushroom", sci:["pleurotus ostreatus","pleurotus pulmonarius","pleurotus"], emoji:"🩶", pivotMm:20, note:"Flushes on dead hardwood logs and stumps after cool, wet weather — can appear nearly year-round, so it responds to relatively modest rain."},
+  {common:"Black Trumpet", sci:["craterellus cornucopioides","craterellus fallax"], emoji:"⚫", pivotMm:48, note:"Hides in leaf litter under oak or beech after heavy summer/fall rain — easy to walk past, and needs real volume to trigger a flush."},
+  {common:"Shaggy Mane", sci:["coprinus comatus"], emoji:"⚪", pivotMm:14, note:"Pops up fast in disturbed soil, lawns, and roadsides after almost any rain — pick quickly, it self-digests within a day."},
+  {common:"Giant Puffball", sci:["calvatia gigantea"], emoji:"⚪", pivotMm:36, note:"Appears in fields and meadows after heavy rain, late summer into fall."},
+  {common:"Puffball", sci:["lycoperdon"], emoji:"⚪", pivotMm:26, note:"Common in grassy areas and open woods after rain."},
+  {common:"Hedgehog Mushroom", sci:["hydnum repandum","hydnum umbilicatum"], emoji:"🟠", pivotMm:38, note:"Shares the damp conifer/hardwood duff that chanterelles favor."},
+  {common:"Honey Mushroom", sci:["armillaria mellea","armillaria"], emoji:"🟡", pivotMm:30, note:"Clusters at the base of stressed or dead trees after fall rains — must be cooked thoroughly."},
+  {common:"Cauliflower Mushroom", sci:["sparassis americana","sparassis crispa","sparassis"], emoji:"🟡", pivotMm:32, note:"Grows at the base of conifers, especially pine, in late summer and fall."},
+  {common:"Wood Blewit", sci:["lepista nuda","clitocybe nuda"], emoji:"🟣", pivotMm:24, note:"Fruits in leaf litter late in the season, sometimes right up to the first frost."},
+  {common:"Ruby Porcini", sci:["boletus rubriceps"], emoji:"🔴", pivotMm:38, note:"Also called the Rocky Mountain King Bolete — the Southwest's regional stand-in for classic porcini. Mycorrhizal with conifers (spruce, pine, fir) in the Southern Rockies and Southwest US, typically at higher elevation. A choice edible, sought after enough to show up at farmers markets in Arizona, New Mexico, and Colorado."},
+  {common:"White Russula", sci:["russula brevipes"], emoji:"⚪", pivotMm:32, note:"Also called Short-stemmed Russula. Mycorrhizal with conifers, especially pine — often pushes up as a dirt-covered mound ('shrump') before breaking the surface. Edible but bland on its own; most foragers actually leave it in the ground hoping it gets parasitized into a Lobster Mushroom instead. Watch for blackening Russula look-alikes that bruise/age to black — true White Russula stays white."},
+  {common:"Lobster Mushroom", sci:["hypomyces lactifluorum"], emoji:"🦞", pivotMm:34, note:"Not a single species — a bright orange-red mold (Hypomyces lactifluorum) that parasitizes White Russula (and some milkcaps), turning a bland host into a firm, seafood-scented choice edible. Look July through October in the same conifer duff where its host grows. Must be cooked; there are no reported dangerous look-alikes, but only pick firm, non-mushy specimens."},
+  {common:"Slippery Jack", sci:["suillus luteus"], emoji:"🟫", pivotMm:32, note:"Grows exclusively with two- and three-needle pines — check pine plantations and roadside pine stands. Peel the slimy cap skin before cooking; it can cause GI upset otherwise."},
+  {common:"Hawk's Wing", sci:["sarcodon imbricatus","sarcodon squamosus"], emoji:"🟤", pivotMm:36, note:"Also called Scaly Hedgehog. Look under mature spruce, fir, or pine, especially in cooler, higher-elevation conifer stands, after good rain in late summer/fall. Can turn bitter with age — smaller, younger caps are the better bet."},
+];
+
+// Populate the species dropdown from the list above
+(function populateSpeciesSelect(){
+  const sel = document.getElementById('species');
+  EDIBLE_SPECIES.slice().sort((a,b) => a.common.localeCompare(b.common)).forEach(sp => {
+    const opt = document.createElement('option');
+    opt.value = sp.common;
+    opt.textContent = `${sp.emoji} ${sp.common}`;
+    sel.appendChild(opt);
+  });
+})();
+
+const $ = id => document.getElementById(id);
+const placeInput = $('place'), radiusSel = $('radius'), speciesSel = $('species'), goBtn = $('goBtn'), geoBtn = $('geoBtn'),
+      geoLabel = $('geoLabel'), statusEl = $('status'), errorBox = $('errorBox'), resultsEl = $('results');
+
+let chosenCoords = null; // {lat, lon, label}
+
+function setStatus(msg){
+  statusEl.textContent = msg;
+  statusEl.classList.toggle('show', !!msg);
+}
+function setError(msg){
+  errorBox.textContent = msg;
+  errorBox.classList.toggle('show', !!msg);
+}
+
+geoBtn.addEventListener('click', () => {
+  if(!navigator.geolocation){ setError('Geolocation is not available in this browser.'); return; }
+  geoBtn.disabled = true;
+  geoLabel.textContent = 'Locating…';
+  navigator.geolocation.getCurrentPosition(pos => {
+    chosenCoords = {lat: pos.coords.latitude, lon: pos.coords.longitude, label: 'your current location'};
+    placeInput.value = 'Current location';
+    geoLabel.textContent = `Lat ${pos.coords.latitude.toFixed(3)}, Lon ${pos.coords.longitude.toFixed(3)}`;
+    geoBtn.disabled = false;
+  }, err => {
+    geoLabel.textContent = '';
+    geoBtn.disabled = false;
+    setError('Could not get your location — type a place name instead.');
+  });
+});
+
+goBtn.addEventListener('click', runForecast);
+placeInput.addEventListener('keydown', e => { if(e.key === 'Enter') runForecast(); });
+
+async function geocode(query){
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=en&format=json`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('Geocoding lookup failed.');
+  const data = await res.json();
+  if(!data.results || !data.results.length) throw new Error(`Couldn't find a location matching "${query}".`);
+  const r = data.results[0];
+  return {lat: r.latitude, lon: r.longitude, label: [r.name, r.admin1, r.country].filter(Boolean).join(', ')};
+}
+
+async function fetchPrecip(lat, lon){
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=precipitation_sum&past_days=14&forecast_days=1&timezone=auto`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('Precipitation data unavailable for this location.');
+  const data = await res.json();
+  const times = data.daily.time.slice(0, 14);
+  const vals = data.daily.precipitation_sum.slice(0, 14).map(v => v === null ? 0 : v);
+  return {times, vals, totalMm: vals.reduce((a,b)=>a+b,0)};
+}
+
+async function fetchSightings(lat, lon, radiusKm){
+  const d1 = new Date(Date.now() - 60*24*3600*1000).toISOString().slice(0,10);
+  const url = `https://api.inaturalist.org/v1/observations?iconic_taxa=Fungi&lat=${lat}&lng=${lon}&radius=${radiusKm}&d1=${d1}&per_page=200&order=desc&order_by=observed_on&photos=true&locale=en`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('iNaturalist sighting data unavailable right now.');
+  const data = await res.json();
+  return data.results || [];
+}
+
+function haversineKm(lat1, lon1, lat2, lon2){
+  const R = 6371;
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLon = (lon2-lon1) * Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// The default public instance (overpass-api.de) is well-documented as unreliable/overloaded — OSM's own
+// community has flagged this. We try a small set of known mirrors in order and use whichever responds first.
+const OVERPASS_ENDPOINTS = [
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.openstreetmap.ru/api/interpreter'
+];
+
+async function queryOverpassWithFallback(query){
+  for(const endpoint of OVERPASS_ENDPOINTS){
+    try{
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 20000); // don't let one dead mirror stall the others
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded'},
+        body: 'data=' + encodeURIComponent(query),
+        signal: controller.signal
+      });
+      clearTimeout(timer);
+      if(!res.ok){ console.warn(`Overpass mirror ${endpoint} returned HTTP ${res.status}`); continue; }
+      return await res.json();
+    } catch(e){
+      console.warn(`Overpass mirror ${endpoint} failed`, e);
+      continue; // try the next mirror
+    }
+  }
+  return null; // every mirror failed
+}
+
+// Pulls real named/numbered woods, reserves, and trail paths from OpenStreetMap (open data, no ToS restriction) —
+// AllTrails itself has no public API and disallows scraping, so we link out to their search instead of pulling their data directly.
+// Note 1: USFS-managed trails are often tagged with only a ref number (e.g. "Trail 94") rather than a name — both are matched.
+// Note 2: US National Forests & Wilderness Areas are tagged boundary=protected_area (not landuse=forest), and many
+// official trails are mapped as route=hiking relations rather than named ways — both are included below.
+function bboxAround(lat, lon, radiusKm){
+  const R = 6371;
+  const dLat = (radiusKm / R) * (180 / Math.PI);
+  const dLon = (radiusKm / R) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
+  return {south: lat - dLat, west: lon - dLon, north: lat + dLat, east: lon + dLon};
+}
+
+async function fetchTrails(lat, lon, radiusKm){
+  // Remote/rural areas have sparser tagging, so give the trail lookup a slightly wider floor than the sighting radius.
+  const effectiveRadiusKm = Math.min(Math.max(radiusKm, 20), 50);
+  const bbox = bboxAround(lat, lon, effectiveRadiusKm);
+  // A single global bbox filter is far cheaper for Overpass to evaluate than repeating an around() radius
+  // calculation on every clause — that per-clause repetition was likely why every mirror was timing out.
+  const query = `[out:json][timeout:25][bbox:${bbox.south},${bbox.west},${bbox.north},${bbox.east}];(
+    way["highway"~"^(path|track|footway|bridleway)$"]["name"];
+    way["highway"~"^(path|track|footway|bridleway)$"]["ref"];
+    relation["route"="hiking"]["name"];
+    node["tourism"="trailhead"];
+    node["tourism"="camp_site"]["name"];
+    way["leisure"="nature_reserve"]["name"];
+    way["boundary"="national_park"]["name"];
+    way["boundary"="protected_area"]["name"];
+    relation["boundary"="protected_area"]["name"];
+    way["landuse"="forest"]["name"];
+    way["natural"="wood"]["name"];
+    node["natural"="peak"]["name"];
+  );out center 60;`;
+
+  try{
+    const data = await queryOverpassWithFallback(query);
+    if(!data) return {items: [], failed: true};
+
+    const seen = new Set();
+    const kindFor = tags => {
+      if(tags.tourism === 'trailhead') return {label:'Trailhead', icon:'📍'};
+      if(tags.tourism === 'camp_site') return {label:'Campground', icon:'⛺'};
+      if(tags.route === 'hiking') return {label:'Hiking route', icon:'🥾'};
+      if(tags.natural === 'peak') return {label:'Peak', icon:'⛰️'};
+      if(tags.boundary === 'national_park') return {label:'National park', icon:'🏞️'};
+      if(tags.boundary === 'protected_area') return {label: tags.protection_title || 'Protected forest land', icon:'🏞️'};
+      if(tags.leisure === 'nature_reserve') return {label:'Nature reserve', icon:'🌳'};
+      if(tags.landuse === 'forest') return {label:'Forest', icon:'🌲'};
+      if(tags.natural === 'wood') return {label:'Woods', icon:'🌲'};
+      return {label:'Trail', icon:'🥾'};
+    };
+    const items = [];
+    (data.elements || []).forEach(el => {
+      const tags = el.tags || {};
+      const displayName = tags.name || (tags.ref ? `Trail ${tags.ref}` : null);
+      if(!displayName || seen.has(displayName)) return;
+      const elLat = el.lat || (el.center && el.center.lat);
+      const elLon = el.lon || (el.center && el.center.lon);
+      if(elLat == null || elLon == null) return;
+      seen.add(displayName);
+      const kind = kindFor(tags);
+      items.push({
+        name: displayName,
+        kind,
+        lat: elLat,
+        lon: elLon,
+        distanceKm: haversineKm(lat, lon, elLat, elLon)
+      });
+    });
+    return {items: items.filter(t => t.distanceKm <= effectiveRadiusKm).sort((a,b) => a.distanceKm - b.distanceKm).slice(0, 8), failed: false};
+  } catch(e){
+    console.warn('Trail lookup failed', e);
+    return {items: [], failed: true};
+  }
+}
+
+function matchEdible(obs){
+  const taxon = obs.taxon;
+  if(!taxon) return null;
+  const name = (taxon.name || '').toLowerCase();
+  const common = (taxon.preferred_common_name || '').toLowerCase();
+  for(const sp of EDIBLE_SPECIES){
+    for(const s of sp.sci){
+      if(name.includes(s)) return sp;
+    }
+    if(common && sp.common.toLowerCase().split(' / ').some(part => common.includes(part.split(' ')[0]))){
+      // loose fallback on common name first word, only if genus check above failed
+    }
+  }
+  return null;
+}
+
+function daysAgo(dateStr){
+  if(!dateStr) return null;
+  const d = new Date(dateStr);
+  if(isNaN(d)) return null;
+  return Math.floor((Date.now() - d.getTime()) / (24*3600*1000));
+}
+
+function rainScore(mm, pivotMm){
+  const pivot = pivotMm || DEFAULT_PIVOT_MM;
+  if(mm <= 0) return 0;
+  const ratio = mm / pivot;
+  return Math.min(100, 100 * (1 - Math.exp(-1.6 * ratio)));
+}
+
+function computeSightingScore(matches){
+  const now = Date.now();
+  let weighted = 0;
+  matches.forEach(m => {
+    const age = daysAgo(m.obs.observed_on || m.obs.observed_on_string);
+    if(age === null) { weighted += 0.5; return; }
+    if(age <= 21) weighted += 2;
+    else if(age <= 60) weighted += 1;
+  });
+  return Math.min(100, weighted * 12);
+}
+
+function scoreLabel(score){
+  if(score < 25) return {text:"Dry spell — low odds", cls:"lo"};
+  if(score < 50) return {text:"Building — worth a look", cls:""};
+  if(score < 75) return {text:"Good flush conditions", cls:"hi"};
+  return {text:"Prime foraging window", cls:"hi"};
+}
+
+function renderDial(score){
+  const r = 54, cx = 70, cy = 70, circumference = 2*Math.PI*r;
+  const pct = Math.max(0, Math.min(100, score));
+  const offset = circumference * (1 - pct/100);
+  const color = pct < 25 ? 'var(--clay)' : pct < 50 ? 'var(--chanterelle)' : 'var(--moss)';
+  return `
+  <svg width="140" height="140" viewBox="0 0 140 140">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--soil-600)" stroke-width="10"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="10"
+      stroke-linecap="round" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
+      transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dashoffset .6s ease;"/>
+    <text x="${cx}" y="${cy-4}" text-anchor="middle" font-family="Fraunces, serif" font-weight="600" font-size="30" fill="var(--spore)">${Math.round(pct)}</text>
+    <text x="${cx}" y="${cy+16}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" letter-spacing="1" fill="var(--spore-dim)">FLUSH INDEX</text>
+  </svg>`;
+}
+
+function renderPrecipChart(times, vals){
+  const maxV = Math.max(...vals, 1);
+  const bars = times.map((t, i) => {
+    const h = Math.max(2, Math.round((vals[i]/maxV) * 100));
+    const d = new Date(t);
+    const label = d.toLocaleDateString(undefined, {month:'numeric', day:'numeric'});
+    return `<div class="bar-col" title="${label}: ${vals[i].toFixed(1)} mm">
+      <div class="bar" style="height:${h}%"></div>
+      <div class="bar-day">${label}</div>
+    </div>`;
+  }).join('');
+  return bars;
+}
+
+// Cumulative running total across the 14 days, used to draw a "when it crossed the pivot" style marker
+function renderCumulativeNote(vals, pivotMm){
+  if(!pivotMm) return '';
+  let running = 0, crossDay = null;
+  for(let i = 0; i < vals.length; i++){
+    running += vals[i];
+    if(crossDay === null && running >= pivotMm) crossDay = vals.length - i; // days ago
+  }
+  if(crossDay === null){
+    return `<p class="species-meta" style="margin-top:10px;">Cumulative rain hasn't yet crossed this species' typical ${pivotMm} mm trigger in the last 14 days.</p>`;
+  }
+  return `<p class="species-meta" style="margin-top:10px;">Rainfall crossed this species' typical ${pivotMm} mm trigger about ${crossDay} day${crossDay === 1 ? '' : 's'} ago.</p>`;
+}
+
+async function runForecast(){
+  setError('');
+  const typed = placeInput.value.trim();
+  if(!typed){ setError('Enter a location, or use your current location.'); return; }
+
+  goBtn.disabled = true;
+  resultsEl.classList.remove('show');
+  setStatus('Locating place…');
+
+  try{
+    let coords;
+    if(chosenCoords && (typed === 'Current location')){
+      coords = chosenCoords;
+    } else {
+      coords = await geocode(typed);
+      chosenCoords = coords;
+    }
+
+    const radiusKm = parseInt(radiusSel.value, 10);
+
+    setStatus('Pulling 14-day rainfall…');
+    const precip = await fetchPrecip(coords.lat, coords.lon);
+
+    setStatus('Checking recent fungi sightings nearby…');
+    const rawObs = await fetchSightings(coords.lat, coords.lon, radiusKm);
+
+    setStatus('Looking up nearby trails and woods…');
+    const trailsResult = await fetchTrails(coords.lat, coords.lon, radiusKm);
+
+    const matchesBySpecies = new Map();
+    rawObs.forEach(obs => {
+      const sp = matchEdible(obs);
+      if(!sp) return;
+      const key = sp.common;
+      if(!matchesBySpecies.has(key)) matchesBySpecies.set(key, {sp, obs: [] });
+      matchesBySpecies.get(key).obs.push(obs);
+    });
+
+    const flatMatches = [];
+    matchesBySpecies.forEach(entry => entry.obs.forEach(o => flatMatches.push({sp:entry.sp, obs:o})));
+
+    const focusName = speciesSel.value; // '' = overview
+    const focusSpecies = focusName ? EDIBLE_SPECIES.find(sp => sp.common === focusName) : null;
+    const pivot = focusSpecies ? focusSpecies.pivotMm : DEFAULT_PIVOT_MM;
+    const scoringMatches = focusSpecies ? flatMatches.filter(m => m.sp.common === focusName) : flatMatches;
+
+    const rScore = rainScore(precip.totalMm, pivot);
+    const sScore = computeSightingScore(scoringMatches);
+    const overall = Math.round(rScore*0.55 + sScore*0.45);
+
+    renderResults({coords, precip, matchesBySpecies, rScore, sScore, overall, radiusKm, focusSpecies, focusMatches: scoringMatches, trails: trailsResult.items, trailsFailed: trailsResult.failed});
+    setStatus('');
+  } catch(err){
+    console.error(err);
+    setError(err.message || 'Something went wrong fetching data.');
+    setStatus('');
+  } finally {
+    goBtn.disabled = false;
+  }
+}
+
+function mostRecentOf(obsList){
+  return obsList.reduce((best, o) => {
+    const dOld = daysAgo(best.observed_on), dNew = daysAgo(o.observed_on);
+    if(dNew === null) return best;
+    if(dOld === null || dNew < dOld) return o;
+    return best;
+  }, obsList[0]);
+}
+
+function ageText(age){
+  return age === null ? 'date unknown' : (age === 0 ? 'today' : `${age} day${age>1?'s':''} ago`);
+}
+
+function obsPhoto(obs){
+  return obs.photos && obs.photos[0] ? obs.photos[0].url.replace('square','medium') : null;
+}
+function obsLink(obs){
+  return obs.uri || `https://www.inaturalist.org/observations/${obs.id}`;
+}
+
+function renderTrails(trails, coords, failed){
+  const trailsArea = $('trailsArea');
+  const placeShort = (coords.label || '').split(',')[0] || '';
+  const allTrailsSearchUrl = `https://www.alltrails.com/search?q=${encodeURIComponent(coords.label || placeInput.value)}`;
+
+  if(!trails || trails.length === 0){
+    const emptyMsg = failed
+      ? "The OpenStreetMap trail lookup didn't respond — it's a shared public service and occasionally times out. Try again in a moment, or use the link below."
+      : "No named or numbered trails, forests, or reserves turned up in OpenStreetMap for this specific area. Remote and rural regions (e.g. national forest backcountry) are often mapped less thoroughly — that doesn't mean nothing's there.";
+    trailsArea.innerHTML = `
+      <div class="no-sightings">${emptyMsg}</div>
+      <p class="trail-source-note">Trail names come from OpenStreetMap's open data — AllTrails has no public API and disallows automated scraping, so this links to AllTrails' own search instead of pulled data. <a href="${allTrailsSearchUrl}" target="_blank" rel="noopener" style="color:var(--chanterelle);">Search AllTrails near ${placeShort || 'this area'} →</a></p>
+    `;
+    return;
+  }
+
+  trailsArea.innerHTML = `
+    <div class="trail-list">
+      ${trails.map(t => {
+        const query = `${t.name}${placeShort ? ' ' + placeShort : ''}`;
+        const atUrl = `https://www.alltrails.com/search?q=${encodeURIComponent(query)}`;
+        const osmUrl = `https://www.openstreetmap.org/?mlat=${t.lat}&mlon=${t.lon}#map=15/${t.lat}/${t.lon}`;
+        return `
+        <div class="trail-row">
+          <span class="trail-icon">${t.kind.icon}</span>
+          <div class="trail-info">
+            <p class="trail-name">${t.name}</p>
+            <p class="trail-meta">${t.kind.label} · ${t.distanceKm.toFixed(1)} km away</p>
+          </div>
+          <div class="trail-links">
+            <a href="${atUrl}" target="_blank" rel="noopener">Find on AllTrails →</a>
+            <a href="${osmUrl}" target="_blank" rel="noopener">Map →</a>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <p class="trail-source-note">Trail and woodland names come from OpenStreetMap's open data, matched by distance. AllTrails has no public API and disallows scraping, so each "Find on AllTrails" link opens their own search for that spot rather than pulling data from them directly. <a href="${allTrailsSearchUrl}" target="_blank" rel="noopener" style="color:var(--chanterelle);">Or browse all AllTrails results near ${placeShort || 'this area'} →</a></p>
+  `;
+}
+
+function renderResults({coords, precip, matchesBySpecies, rScore, sScore, overall, radiusKm, focusSpecies, focusMatches, trails, trailsFailed}){
+  const label = scoreLabel(overall);
+  const inches = (precip.totalMm/25.4).toFixed(2);
+  const totalSightings = [...matchesBySpecies.values()].reduce((a,e)=>a+e.obs.length,0);
+
+  const scoreLabelText = focusSpecies ? `${focusSpecies.emoji} ${focusSpecies.common}: ${label.text}` : label.text;
+  const descText = focusSpecies
+    ? `${coords.label || 'This location'} has logged <strong style="color:var(--spore)">${precip.totalMm.toFixed(1)} mm (${inches} in)</strong> of rain over the last 14 days, scored against ${focusSpecies.common}'s typical ~${focusSpecies.pivotMm} mm trigger — plus <strong style="color:var(--spore)">${focusMatches.length}</strong> ${focusSpecies.common} sighting${focusMatches.length===1?'':'s'} within ${radiusKm} km over the last 60 days.`
+    : `${coords.label || 'This location'} has logged <strong style="color:var(--spore)">${precip.totalMm.toFixed(1)} mm (${inches} in)</strong> of rain over the last 14 days, and <strong style="color:var(--spore)">${totalSightings}</strong> edible-species sightings within ${radiusKm} km over the last 60 days.`;
+
+  $('scoreBlock').innerHTML = `
+    <div class="dial-wrap">${renderDial(overall)}</div>
+    <div class="score-text">
+      <p class="score-label">${scoreLabelText}</p>
+      <p class="score-desc">${descText}</p>
+      ${focusSpecies ? `<p class="score-desc" style="margin-top:8px;">${focusSpecies.note}</p>` : ''}
+      <div class="score-tags">
+        <span class="tag ${rScore>=50?'hi':(rScore<25?'lo':'')}">Rainfall signal: ${Math.round(rScore)}/100</span>
+        <span class="tag ${sScore>=50?'hi':(sScore<25?'lo':'')}">Sighting signal: ${Math.round(sScore)}/100</span>
+      </div>
+    </div>
+  `;
+
+  $('precipCard').innerHTML = `
+    <div class="precip-header">
+      <div>
+        <p class="section-label" style="margin-bottom:4px;">14-day rainfall</p>
+        <div class="precip-total">${precip.totalMm.toFixed(1)} mm <span>${inches} in cumulative</span></div>
+      </div>
+    </div>
+    <div class="chart">${renderPrecipChart(precip.times, precip.vals)}</div>
+    ${focusSpecies ? renderCumulativeNote(precip.vals, focusSpecies.pivotMm) : ''}
+  `;
+
+  resultsEl.classList.add('show');
+
+  renderTrails(trails, coords, trailsFailed);
+
+  const speciesArea = $('speciesArea');
+  const sectionLabel = $('speciesSectionLabel');
+
+  if(focusSpecies){
+    sectionLabel.textContent = `${focusSpecies.common} sightings nearby`;
+    if(focusMatches.length === 0){
+      speciesArea.innerHTML = `<div class="no-sightings">No ${focusSpecies.common} sightings logged on iNaturalist within ${radiusKm} km in the last 60 days. The rainfall signal above is still a useful read on conditions — try a wider radius for sighting confirmation.</div>`;
+      return;
+    }
+    const sortedObs = focusMatches.map(m => m.obs).sort((a,b) => (daysAgo(a.observed_on) ?? 999) - (daysAgo(b.observed_on) ?? 999)).slice(0, 12);
+    speciesArea.innerHTML = `<div class="species-grid">${sortedObs.map(obs => {
+      const age = daysAgo(obs.observed_on);
+      const photo = obsPhoto(obs);
+      const sciName = obs.taxon ? obs.taxon.name : '';
+      const place = obs.place_guess || '';
+      return `
+        <div class="species-card">
+          ${photo ? `<img class="species-photo" src="${photo}" alt="${focusSpecies.common}" loading="lazy">` : `<div class="species-photo placeholder">${focusSpecies.emoji}</div>`}
+          <div class="species-body">
+            <p class="species-name">${focusSpecies.emoji} ${focusSpecies.common}</p>
+            <p class="species-sci">${sciName}</p>
+            <p class="species-meta">${ageText(age)}${place ? ' · ' + place : ''}</p>
+            <a class="species-link" href="${obsLink(obs)}" target="_blank" rel="noopener">View on iNaturalist →</a>
+          </div>
+        </div>`;
+    }).join('')}</div>`;
+    return;
+  }
+
+  sectionLabel.textContent = 'Edible species spotted nearby';
+  if(matchesBySpecies.size === 0){
+    speciesArea.innerHTML = `<div class="no-sightings">No matching edible-species sightings logged on iNaturalist within ${radiusKm} km in the last 60 days. Try widening the radius, or conditions locally may simply be quiet right now.</div>`;
+    return;
+  }
+
+  const sorted = [...matchesBySpecies.values()].sort((a,b) => b.obs.length - a.obs.length);
+  speciesArea.innerHTML = `<div class="species-grid">${sorted.map(entry => {
+    const sp = entry.sp;
+    const mostRecent = mostRecentOf(entry.obs);
+    const age = daysAgo(mostRecent.observed_on);
+    const photo = obsPhoto(mostRecent);
+    const sciName = mostRecent.taxon ? mostRecent.taxon.name : '';
+    return `
+      <div class="species-card">
+        ${photo ? `<img class="species-photo" src="${photo}" alt="${sp.common}" loading="lazy">` : `<div class="species-photo placeholder">${sp.emoji}</div>`}
+        <div class="species-body">
+          <p class="species-name">${sp.emoji} ${sp.common}</p>
+          <p class="species-sci">${sciName}</p>
+          <p class="species-meta">${entry.obs.length} sighting${entry.obs.length>1?'s':''} nearby · most recent ${ageText(age)}</p>
+          <p class="species-note">${sp.note}</p>
+          <a class="species-link" href="${obsLink(mostRecent)}" target="_blank" rel="noopener">View sighting on iNaturalist →</a>
+        </div>
+      </div>`;
+  }).join('')}</div>`;
+}
+</script>
+</body>
+</html>
