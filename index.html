@@ -67,6 +67,25 @@
     max-width:56ch;
   }
 
+  .tip-jar{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin-top:18px;
+    padding:9px 16px;
+    background:var(--chanterelle);
+    color:#201405;
+    font-family:'Work Sans',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    text-decoration:none;
+    border-radius:8px;
+    transition:background .15s, transform .1s;
+  }
+  .tip-jar:hover{background:#eca260; transform:translateY(-1px);}
+  .tip-jar:active{transform:translateY(0);}
+  .tip-jar-icon{font-size:15px;}
+
   /* ---------- Search card ---------- */
   .search-card{
     background:var(--soil-800);
@@ -331,6 +350,10 @@
     <div class="eyebrow">Field Journal · Vol. 01</div>
     <h1>Fungal <em>Forecast</em></h1>
     <p class="sub">Cross-references two weeks of rainfall against nearby edible-mushroom sightings on iNaturalist to gauge whether conditions favor a flush.</p>
+    <!-- TIP JAR: replace the href below with your real Buy Me a Coffee / Ko-fi page URL -->
+    <a class="tip-jar" href="https://buymeacoffee.com/tuna83" target="_blank" rel="noopener">
+      <span class="tip-jar-icon">☕</span> Buy me a coffee
+    </a>
   </header>
 
   <div class="search-card">
@@ -389,8 +412,14 @@
   </div>
 
   <footer>
-    Rain data: Open-Meteo forecast archive · Sighting data: iNaturalist public API (Fungi observations, last 60 days)<br>
+    <a href="https://open-meteo.com/" target="_blank" rel="noopener">Weather data by Open-Meteo.com</a>
+    (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>) ·
+    Sightings from <a href="https://www.inaturalist.org/" target="_blank" rel="noopener">iNaturalist</a> (photos belong to their observers) ·
+    Trail data <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>
+    (<a href="https://opendatacommons.org/licenses/odbl/" target="_blank" rel="noopener">ODbL</a>)<br>
     This is a heuristic built from public data, not a scientific model or an identification service.
+    <a href="terms.html">Terms &amp; Disclaimer</a><br>
+    Found this useful? <a href="https://buymeacoffee.com/tuna83" target="_blank" rel="noopener">Buy me a coffee ☕</a>
   </footer>
 
 </div>
