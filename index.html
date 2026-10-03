@@ -811,10 +811,18 @@ function obsLink(obs){
   return obs.uri || `https://www.inaturalist.org/observations/${obs.id}`;
 }
 
+// AllTrails' search page ignores ?q= and falls back to the browser's location, so link to its map explorer
+// with an explicit bounding box around the target coordinates instead.
+function allTrailsExploreUrl(lat, lon, halfSpanDeg){
+  const dLon = halfSpanDeg / Math.max(Math.cos(lat * Math.PI / 180), 0.2);
+  const f = n => n.toFixed(5);
+  return `https://www.alltrails.com/explore?b_tl_lat=${f(lat + halfSpanDeg)}&b_tl_lng=${f(lon - dLon)}&b_br_lat=${f(lat - halfSpanDeg)}&b_br_lng=${f(lon + dLon)}`;
+}
+
 function renderTrails(trails, coords, failed){
   const trailsArea = $('trailsArea');
   const placeShort = (coords.label || '').split(',')[0] || '';
-  const allTrailsSearchUrl = `https://www.alltrails.com/search?q=${encodeURIComponent(coords.label || placeInput.value)}`;
+  const allTrailsSearchUrl = allTrailsExploreUrl(coords.lat, coords.lon, 0.15);
 
   if(!trails || trails.length === 0){
     const emptyMsg = failed
@@ -830,8 +838,7 @@ function renderTrails(trails, coords, failed){
   trailsArea.innerHTML = `
     <div class="trail-list">
       ${trails.map(t => {
-        const query = `${t.name}${placeShort ? ' ' + placeShort : ''}`;
-        const atUrl = `https://www.alltrails.com/search?q=${encodeURIComponent(query)}`;
+        const atUrl = allTrailsExploreUrl(t.lat, t.lon, 0.04);
         const osmUrl = `https://www.openstreetmap.org/?mlat=${t.lat}&mlon=${t.lon}#map=15/${t.lat}/${t.lon}`;
         return `
         <div class="trail-row">
@@ -841,13 +848,13 @@ function renderTrails(trails, coords, failed){
             <p class="trail-meta">${t.kind.label} · ${t.distanceKm.toFixed(1)} km away</p>
           </div>
           <div class="trail-links">
-            <a href="${atUrl}" target="_blank" rel="noopener">Find on AllTrails →</a>
+            <a href="${atUrl}" target="_blank" rel="noopener">See area on AllTrails →</a>
             <a href="${osmUrl}" target="_blank" rel="noopener">Map →</a>
           </div>
         </div>`;
       }).join('')}
     </div>
-    <p class="trail-source-note">Trail and woodland names come from OpenStreetMap's open data, matched by distance. AllTrails has no public API and disallows scraping, so each "Find on AllTrails" link opens their own search for that spot rather than pulling data from them directly. <a href="${allTrailsSearchUrl}" target="_blank" rel="noopener" style="color:var(--chanterelle);">Or browse all AllTrails results near ${placeShort || 'this area'} →</a></p>
+    <p class="trail-source-note">Trail and woodland names come from OpenStreetMap's open data, matched by distance. AllTrails has no public API and disallows scraping, so each "See area on AllTrails" link opens their map explorer centered on that spot rather than pulling data from them directly. <a href="${allTrailsSearchUrl}" target="_blank" rel="noopener" style="color:var(--chanterelle);">Or browse all AllTrails results near ${placeShort || 'this area'} →</a></p>
   `;
 }
 
