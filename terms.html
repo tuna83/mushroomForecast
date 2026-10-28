@@ -40,7 +40,7 @@
 <div class="wrap">
   <a class="back" href="index.html">← Back to Fungal Forecast</a>
   <h1>Terms &amp; Disclaimer</h1>
-  <div class="updated">Last updated: October 2, 2026</div>
+  <div class="updated">Last updated: October 28, 2026</div>
 
   <div class="warning">
     <p><strong>Never eat a wild mushroom based on this app.</strong> Fungal Forecast cannot identify a mushroom, and some deadly species closely resemble popular edibles. Misidentification can cause serious illness, organ failure, or death.</p>
@@ -50,7 +50,7 @@
   <p>Fungal Forecast is a free hobby project. It combines recent rainfall, public sighting records, and map data to produce a rough, heuristic estimate of whether conditions might favor certain edible mushrooms in an area. It is not a scientific model, a field guide, or an identification service.</p>
 
   <h2>2. Not expert advice</h2>
-  <p>Nothing in the app is professional, medical, or mycological advice. Species notes (habitat, season, rain thresholds, edibility comments) are general summaries and may be incomplete, simplified, or wrong for your region. Edibility and look-alikes vary by location, and some people react badly to species that are widely considered edible.</p>
+  <p>Nothing in the app is professional, medical, or mycological advice. Species notes (habitat, season, rain and soil-temperature thresholds, elevation hints, look-alike warnings, edibility comments) are general summaries and may be incomplete, simplified, or wrong for your region. Look-alike warnings are brief and not exhaustive. Edibility and look-alikes vary by location, and some people react badly to species that are widely considered edible.</p>
   <p>Before consuming any wild mushroom, confirm its identification yourself using current field guides, spore prints, and ideally an experienced forager or local mycological society. If you are not certain, do not eat it. If you or someone else becomes ill after eating a wild mushroom, contact poison control (in the US, 1-800-222-1222) or emergency services right away.</p>
 
   <h2>3. Use at your own risk; no warranty</h2>
@@ -66,12 +66,14 @@
   <ul>
     <li><strong>Weather data</strong> by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> (the location search uses Open-Meteo's geocoding service, which is offered under CC BY-NC 4.0). Open-Meteo's free API is for non-commercial use.</li>
     <li><strong>Mushroom sightings</strong> come from <a href="https://www.inaturalist.org/" target="_blank" rel="noopener">iNaturalist</a>. Observations and photos belong to the individual observers and carry the licenses they chose. Each sighting card links back to the original observation, where the observer and license are shown. This app is not affiliated with or endorsed by iNaturalist.</li>
-    <li><strong>Trail and woodland data</strong> are <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>, available under the <a href="https://opendatacommons.org/licenses/odbl/" target="_blank" rel="noopener">Open Database License (ODbL)</a>.</li>
+    <li><strong>Historical rainfall</strong> used for local calibration comes from Open-Meteo's historical weather API, which is based on ERA5 reanalysis data (Copernicus / ECMWF), also under CC BY 4.0. Soil temperature and elevation come from Open-Meteo's forecast API.</li>
+    <li><strong>Map tiles and trail/woodland data</strong> are <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>, available under the <a href="https://opendatacommons.org/licenses/odbl/" target="_blank" rel="noopener">Open Database License (ODbL)</a>. The map is drawn with <a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a>.</li>
     <li>"See area on AllTrails" links simply open AllTrails' own map explorer at that location. No AllTrails data is pulled or stored, and this app is not affiliated with AllTrails.</li>
   </ul>
 
   <h2>7. Privacy</h2>
-  <p>The app has no accounts and does not run its own server or database. It does not store your searches or location. To work, your browser sends the place you search for (or your device location, if you choose "Use my location") directly to Open-Meteo, iNaturalist, and OpenStreetMap's Overpass servers, which have their own privacy practices. Your hosting provider and those services may log standard technical information such as your IP address.</p>
+  <p>The app has no accounts and does not run its own server or database, and I do not collect or store your searches or location. To work, your browser sends the place you search for (or your device location, if you choose "Use my location") directly to Open-Meteo, iNaturalist, and OpenStreetMap's Overpass servers, and loads map tiles from OpenStreetMap; those services have their own privacy practices. Your hosting provider and those services may log standard technical information such as your IP address.</p>
+  <p>Your browser's local storage on your own device is used to remember your unit preference, any spots you choose to save, and cached lookups (species IDs and historical-pattern results) so they load faster. This stays on your device; clear your browser's site data to remove it. "Copy link" creates a web address containing the place, coordinates, radius, and species you searched, so anyone you send it to can see that location.</p>
 
   <h2>8. Tips</h2>
   <p>The "Buy me a coffee" link is an optional tip handled entirely by <a href="https://buymeacoffee.com/tuna83" target="_blank" rel="noopener">Buy Me a Coffee</a> under its own terms. Tips do not buy any warranty, support, or special features.</p>
